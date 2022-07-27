@@ -13,16 +13,16 @@ provider "volterra" {
 }
 
 resource "volterra_api_definition" "this" {
-  name      = "boutique"
+  name      = "${var.app-name}-api-definition"
   namespace = var.namespace
 
   swagger_specs = ["https://acmecorp.staging.volterra.us/api/object_store/namespaces/wsronek-ns1/stored_objects/swagger/wsronek-boutique-swagger/v1-22-07-18"]
 }
 
 resource "volterra_origin_pool" "this" {
-  name                   = "api-protection-${app-name}-origin"
+  name                   = "api-protection-${var.app-name}-origin"
   namespace              = var.namespace
-  description            = "Origin pool pointing to ${app-name} frontend k8s service running on private k8s cluster"
+  description            = "Origin pool pointing to ${var.app-name} frontend k8s service running on private k8s cluster"
   loadbalancer_algorithm = "ROUND ROBIN"
 
   origin_servers {
@@ -30,7 +30,7 @@ resource "volterra_origin_pool" "this" {
       inside_network  = false
       outside_network = false
       vk8s_networks   = true
-      service_name    = "${app-frontend-service-name}.${var.namespace}"
+      service_name    = "${var.app-frontend-service-name}.${var.namespace}"
       site_locator {
         site {
           name      = "wsronek-pz01"
@@ -45,10 +45,10 @@ resource "volterra_origin_pool" "this" {
 }
 
 resource "volterra_http_loadbalancer" "this" {
-  name                            = "api-protection-${app-name}"
+  name                            = "api-protection-${var.app-name}"
   namespace                       = var.namespace
-  description                     = "HTTPS loadbalancer object ${app-name} app"
-  domains                         = ["api-protection-${app-name}.acmecorp-stage.f5xc.app"]
+  description                     = "HTTPS loadbalancer object ${var.app-name} app"
+  domains                         = ["api-protection-${var.app-name}.acmecorp-stage.f5xc.app"]
   advertise_on_public_default_vip = true
   no_service_policies             = true
   disable_rate_limit              = true
