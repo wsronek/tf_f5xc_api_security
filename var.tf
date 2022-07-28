@@ -1,3 +1,8 @@
+variable tenant {
+  type = string
+  default = "acmecorp"
+}
+
 variable namespace {
   type = string
   default = "wsronek-ns1"

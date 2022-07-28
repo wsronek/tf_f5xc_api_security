@@ -15,6 +15,7 @@ provider "volterra" {
 resource "volterra_api_definition" "this" {
   name      = "${var.app-name}-api-definition"
   namespace = var.namespace
+  tenant    = var.tenant
 
   swagger_specs = ["https://acmecorp.staging.volterra.us/api/object_store/namespaces/wsronek-ns1/stored_objects/swagger/wsronek-boutique-swagger/v1-22-07-18"]
 }
@@ -22,6 +23,7 @@ resource "volterra_api_definition" "this" {
 resource "volterra_origin_pool" "this" {
   name                   = "api-protection-${var.app-name}-origin"
   namespace              = var.namespace
+  tenant                 = var.tenant
   description            = "Origin pool pointing to ${var.app-name} frontend k8s service running on private k8s cluster"
   loadbalancer_algorithm = "ROUND ROBIN"
 
@@ -35,6 +37,7 @@ resource "volterra_origin_pool" "this" {
         site {
           name      = "wsronek-pz01"
           namespace = "system"
+          tenant    = var.tenant
         }
       }
     }
@@ -47,6 +50,7 @@ resource "volterra_origin_pool" "this" {
 resource "volterra_http_loadbalancer" "this" {
   name                            = "api-protection-${var.app-name}"
   namespace                       = var.namespace
+  tenant                          = var.tenant
   description                     = "HTTPS loadbalancer object ${var.app-name} app"
   domains                         = ["api-protection-${var.app-name}.acmecorp-stage.f5xc.app"]
   advertise_on_public_default_vip = true
@@ -60,6 +64,7 @@ resource "volterra_http_loadbalancer" "this" {
     pool {
       name      = volterra_origin_pool.this.name
       namespace = var.namespace
+      tenant    = var.tenant
     }
   }
 
@@ -70,7 +75,8 @@ resource "volterra_http_loadbalancer" "this" {
   }
 
   api_definition {
-    name = volterra_api_definition.this.name
+    name      = volterra_api_definition.this.name
     namespace = var.namespace
+    tenant    = var.tenant
   }
 }
